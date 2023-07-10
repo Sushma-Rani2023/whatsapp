@@ -1,0 +1,30 @@
+service: sales-order
+
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: '20201221'
+
+functions:
+  configure:
+    handler: src/controller/configure.configure
+    events:
+      - http:
+          path: /webhooks
+          method: get
+
+  receivedmsg:
+    handler: src/controller/receivedmsg.receivedmsg
+    events:
+      - http:
+          path: /webhooks
+          method: post
+  
+
+  

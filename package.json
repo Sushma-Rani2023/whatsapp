@@ -1,0 +1,25 @@
+{
+  "name": "sales-order",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "sls deploy",
+    "remove": "sls remove",
+    "offline": "sls offline"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1316.0",
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^6.9.1",
+    "serverless": "^2.72.3"
+  },
+  "devDependencies": {
+    "serverless-offline": "^6.9.0"
+  }
+}
