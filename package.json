@@ -13,13 +13,13 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1316.0",
-    "bcrypt": "^5.1.0",
     "dotenv": "^16.0.3",
-    "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.9.1",
-    "serverless": "^2.72.3"
+    "serverless": "^2.72.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^6.9.0"
   }
 }

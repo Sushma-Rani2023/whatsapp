@@ -1,14 +1,17 @@
 const mongoose = require('mongoose');
 
-const messageSchema = new mongoose.Schema({
-  sender: String,
-  content: String,
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
-});
+const messageSchema = new mongoose.Schema([{
+ Product_name:{
+  type:String
+ },
+ Item_id:{
+    type:String
+ },
+ Quantity:{
+    type:Number
+ }
+}]);
 
-const Message = mongoose.model('Message', messageSchema);
+const Message = mongoose.model('Order', messageSchema);
 
 module.exports = Message;
