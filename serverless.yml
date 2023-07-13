@@ -12,9 +12,10 @@ provider:
   name: aws
   runtime: nodejs14.x
   lambdaHashingVersion: '20201221'
-  timeout: 30
+  # timeout: 300
   environment:
     MONGO_URI: ${env:MONGO_URI}
+    mytoken: ${env:mytoken}
 
 
 
@@ -39,6 +40,12 @@ functions:
     events:
       - http:
           path: /upload
+          method: get
+  hello:
+    handler: src/controller/hello.hello
+    events:
+      - http:
+          path: /hello
           method: get
 
   
