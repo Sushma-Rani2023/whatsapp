@@ -16,6 +16,9 @@ provider:
   environment:
     MONGO_URI: ${env:MONGO_URI}
     mytoken: ${env:mytoken}
+    accesskey: ${env:accesskey}
+    secretkey: ${env:secretkey}
+    bucket: ${env.bucket}
 
 
 
