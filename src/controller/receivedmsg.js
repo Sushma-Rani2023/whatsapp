@@ -1,11 +1,15 @@
 const { saveorder } = require("../controller/saveorder");
+
 exports.receivedmsg = async (event) => {
   try {
     console.log("Let's Start");
+    return {
+      statusCode:200
+    }
     console.log("Hi", event.body);
-    const body_param = JSON.parse(event.body);
-    console.log("Received Message:", JSON.stringify(body_param));
 
+    const body_param = JSON.parse(event.body);
+    console.log("body_param", body_param);
     if (
       body_param.object &&
       body_param.entry &&
@@ -13,33 +17,23 @@ exports.receivedmsg = async (event) => {
       body_param.entry[0].changes[0].value.messages &&
       body_param.entry[0].changes[0].value.messages[0]
     ) {
+      await saveorder(body_param);
 
-      console.log("Message bosy is found", body_param.entry[0].changes[0].value.messages[0])
-      await saveorder(body_param).then((result) => {
-        console.log('result is',result)
-        
-      }).catch((err) => {
-        console.log('errir is',err)
-        
-      });
-
-      
-       return{
-        statusCode:200,
-        body:"Message found"
-       }
-
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: "Order is saved successfully" }),
+      };
     } else {
       return {
         statusCode: 404,
-        body: "Message Not Found",
+        body: JSON.stringify({ message: "Invalid request body" }),
       };
     }
   } catch (error) {
     console.error("An error occurred:", error);
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: JSON.stringify({ message: "Internal Server Error" }),
     };
   }
 };

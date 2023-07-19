@@ -9,4 +9,4 @@ const messageSchema = new mongoose.Schema({
   Meta_object: { type: Object, required: true }
 });
 
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = mongoose.model('order', messageSchema);

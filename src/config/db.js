@@ -10,7 +10,7 @@ const connectDB = async () => {
             // socketTimeoutMS:600000,
             // connectTimeoutMS:600000
         });
-
+    
         console.log("MongoDB is connected And helloo with MongoDB");
         
     } catch (err) {
