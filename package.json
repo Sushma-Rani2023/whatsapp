@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1316.0",
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
     "fuzzball": "^2.1.2",
     "js-levenshtein": "^1.1.6",

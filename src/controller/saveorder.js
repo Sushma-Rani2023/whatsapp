@@ -4,27 +4,27 @@ const connectDB = require("../config/db");
 const Levenshtein = require("js-levenshtein");
 const XLSX = require("xlsx");
 const aws = require("aws-sdk");
+const axios = require("axios");
 
 function fuzzyMatch(searchTerm) {
   const escapedTerm = escapeRegExp(searchTerm);
-  const regexPattern = escapedTerm.split("").join(".*");
+  const regexPattern = `.*${escapedTerm.split(" ").join(".*")}.*`;
   console.log("regex pattern", regexPattern);
   return regexPattern;
 }
 
 function escapeRegExp(string) {
-  const pattern = string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = string.replace(/[.*+?^${}()|[\]\\]/g, "");
   console.log("pattern is", pattern);
   return pattern;
 }
 
-// Function to upload file to S3
 const uploadToS3 = async (bucket, key, buffer) => {
-  const s3=new aws.S3({
+  const s3 = new aws.S3({
     accessKeyId: process.env.accesskey,
-secretAccessKey: process.env.secretkey,
-region: "ap-south-1",
-})
+    secretAccessKey: process.env.secretkey,
+    region: "ap-south-1",
+  });
   const uploadparams = {
     Bucket: bucket,
     Key: key,
@@ -35,7 +35,10 @@ region: "ap-south-1",
 
 module.exports.saveorder = async (body) => {
   try {
-    console.log("Let's Start");
+    console.log("save order");
+
+    
+
     console.log("Hi", body);
     await connectDB();
 
@@ -47,6 +50,12 @@ module.exports.saveorder = async (body) => {
     console.log("Message Array:", msg_array);
     const order_list = [];
 
+    if (msg_array.length === 0) {
+      return {
+        body: { message: "No order found " },
+      };
+    }
+
     for (const text of msg_array) {
       let dotIndex = text.indexOf(".");
       let spaceIndex = text.indexOf(" ");
@@ -56,14 +65,53 @@ module.exports.saveorder = async (body) => {
       }
 
       const number = text.substring(0, dotIndex);
-      const rest = text.substring(dotIndex + 2).replace(/[^a-zA-Z0-9 ]/g, "");
-
+      let rest = text
+        .substring(dotIndex + 2)
+        .replace(/[^a-zA-Z0-9,\/() ]/g, "");
       console.log("Number:", number);
       console.log("Rest:", rest);
+      let option1 = "";
+      let option2 = "";
+
+      const commaIndex = rest.indexOf(",");
+      const slashIndex = rest.indexOf("/");
+      if (commaIndex !== -1 && slashIndex !== -1) {
+        option1 = rest.substring(commaIndex + 1, slashIndex).trim();
+        option2 = rest.substring(slashIndex + 1).trim();
+        rest = rest.substring(0, commaIndex).trim();
+      } else if (commaIndex !== -1) {
+        option1 = rest.substring(commaIndex + 1).trim();
+        rest = rest.substring(0, commaIndex).trim();
+      } else if (slashIndex !== -1) {
+        option2 = rest.substring(slashIndex + 1).trim();
+        rest = rest.substring(0, slashIndex).trim();
+      }
+
+      console.log("options are:", option1, option2);
+      console.log("Rest:", rest);
+
+      console.log("options is ", option1, option2);
 
       const regexPattern = fuzzyMatch(rest);
 
+      const regexQuery = {
+        Item_name: { $regex: new RegExp(regexPattern, "i") },
+      };
+      const option1Query = {
+        Item_name: { $regex: new RegExp(fuzzyMatch(option1), "i") },
+      };
+      const option2Query = {
+        Item_name: { $regex: new RegExp(fuzzyMatch(option2), "i") },
+      };
+
+      // const fuzzySearchQuery = {
+      //    Status: "Active",
+      //       // $or: [regexQuery,option1Query, option2Query],
+      //       { Item_name: { $regex: new RegExp(regexPattern, "i") } };
+
+      // };
       const fuzzySearchQuery = {
+        Status: "Active",
         Item_name: { $regex: new RegExp(regexPattern, "i") },
       };
 
@@ -86,7 +134,10 @@ module.exports.saveorder = async (body) => {
           Quantity: number,
         });
       } else {
-        throw new Error("No matching products found");
+        return {
+          statusCode: 400,
+          body: { message: `No match found of product, ${rest}` },
+        };
       }
     }
 
@@ -106,19 +157,19 @@ module.exports.saveorder = async (body) => {
     const formattedDate = `${day} ${month} ${year}`;
 
     const worksheetData = order_list.map((order, index) => ({
-      'Sr. No.': index + 1,
-      'Product_Name': order.Item_name,
-      'Quantity': order.Quantity,
-      'Product_ID': order.Item_id,
-      'Costumer_Reference': costumer_reference,
-      'Date': formattedDate,
+      "Sr. No.": index + 1,
+      Product_Name: order.Item_name,
+      Quantity: order.Quantity,
+      Product_ID: order.Item_id,
+      Costumer_Reference: costumer_reference,
+      Date: formattedDate,
     }));
 
     console.log("worksheet data is", worksheetData);
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    const xlsxBuffer = XLSX.write(workbook, { type: 'buffer' });
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const xlsxBuffer = XLSX.write(workbook, { type: "buffer" });
 
     const bucket = process.env.bucket;
     const key = `Order_PF_${Date.now()}.xlsx`;
@@ -130,13 +181,13 @@ module.exports.saveorder = async (body) => {
 
     return {
       statusCode: 200,
-      body: "Order is saved Successfully",
+      body: { message: "Order is saved Successfully" },
     };
   } catch (error) {
     console.error("An error occurred:", error);
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: { message: "Internal Server Error" },
     };
   }
 };
