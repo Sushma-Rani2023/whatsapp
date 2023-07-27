@@ -9,13 +9,13 @@ const axios = require("axios");
 function fuzzyMatch(searchTerm) {
   const escapedTerm = escapeRegExp(searchTerm);
   const regexPattern = `.*${escapedTerm.split(" ").join(".*")}.*`;
-  console.log("regex pattern", regexPattern);
+ 
   return regexPattern;
 }
 
 function escapeRegExp(string) {
   const pattern = string.replace(/[.*+?^${}()|[\]\\]/g, "");
-  console.log("pattern is", pattern);
+ 
   return pattern;
 }
 
@@ -35,11 +35,7 @@ const uploadToS3 = async (bucket, key, buffer) => {
 
 module.exports.saveorder = async (body) => {
   try {
-    console.log("save order");
-
     
-
-    console.log("Hi", body);
     await connectDB();
 
     const msg = body.entry[0].changes[0].value.messages[0].text.body;
@@ -47,7 +43,6 @@ module.exports.saveorder = async (body) => {
     const costumer_reference = msg_arrayed[0];
     const msg_array = msg_arrayed.slice(1);
 
-    console.log("Message Array:", msg_array);
     const order_list = [];
 
     if (msg_array.length === 0) {
@@ -68,8 +63,7 @@ module.exports.saveorder = async (body) => {
       let rest = text
         .substring(dotIndex + 2)
         .replace(/[^a-zA-Z0-9,\/() ]/g, "");
-      console.log("Number:", number);
-      console.log("Rest:", rest);
+     
       let option1 = "";
       let option2 = "";
 
@@ -87,10 +81,6 @@ module.exports.saveorder = async (body) => {
         rest = rest.substring(0, slashIndex).trim();
       }
 
-      console.log("options are:", option1, option2);
-      console.log("Rest:", rest);
-
-      console.log("options is ", option1, option2);
 
       const regexPattern = fuzzyMatch(rest);
 
@@ -104,12 +94,7 @@ module.exports.saveorder = async (body) => {
         Item_name: { $regex: new RegExp(fuzzyMatch(option2), "i") },
       };
 
-      // const fuzzySearchQuery = {
-      //    Status: "Active",
-      //       // $or: [regexQuery,option1Query, option2Query],
-      //       { Item_name: { $regex: new RegExp(regexPattern, "i") } };
-
-      // };
+      
       const fuzzySearchQuery = {
         Status: "Active",
         Item_name: { $regex: new RegExp(regexPattern, "i") },
@@ -165,7 +150,7 @@ module.exports.saveorder = async (body) => {
       Date: formattedDate,
     }));
 
-    console.log("worksheet data is", worksheetData);
+   
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
@@ -177,7 +162,7 @@ module.exports.saveorder = async (body) => {
     // Upload to S3 using the utility function
     await uploadToS3(bucket, key, xlsxBuffer);
 
-    console.log("Order List saved:", newMessage);
+   
 
     return {
       statusCode: 200,

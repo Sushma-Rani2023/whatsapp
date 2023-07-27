@@ -10,10 +10,10 @@ exports.savedata = async (event) => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const data = XLSX.utils.sheet_to_json(sheet);
-    console.log('data is',data[0])
+   
 
     const result = await Item.insertMany(data);
-    console.log('Items saved:');
+  
 
     return {
       statusCode: 200,

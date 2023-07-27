@@ -7,3 +7,4 @@ exports.hello=async(event)=>{
         body: JSON.stringify("Data read and saved successfully"),
       };
 }
+

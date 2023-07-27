@@ -13,7 +13,6 @@ const itemSchema = new mongoose.Schema({
   },
 });
 
-// Add text index on the Item_name field
 itemSchema.index({ Item_name: "text" });
 
 const Item = mongoose.model("Item", itemSchema);
